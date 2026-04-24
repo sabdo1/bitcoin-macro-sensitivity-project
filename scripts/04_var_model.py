@@ -49,6 +49,8 @@ transformed['BREAKEVEN_diff'] = df['BREAKEVEN'].diff()
 # Drop the first row (NaN from differencing)
 transformed = transformed.dropna()
 
+transformed = transformed[['US10Y_diff', 'BREAKEVEN_diff', 'VIX_ret', 'SP500_ret', 'DXY_ret', 'BTC_ret']]
+
 print("\nTransformed data (first 5 rows):")
 print(transformed.head())
 print(f"\nShape after transformation: {transformed.shape}")
@@ -116,6 +118,10 @@ for col, d in zip(transformed.columns, dw):
     flag = '✓' if 1.5 < d < 2.5 else '⚠ CHECK'
     print(f"  {col:<15}: DW = {d:.4f}  {flag}")
 
+# VAR Stability Check
+print("\n--- VAR Stability Check ---")
+print(f"Full sample VAR stable: {var_result.is_stable()}")
+
 
 # STEP 6: IMPULSE RESPONSE FUNCTIONS (IRFs) WITH CONFIDENCE INTERVALS
 
@@ -129,9 +135,9 @@ vix_idx   = list(transformed.columns).index('VIX_ret')
 sp500_idx = list(transformed.columns).index('SP500_ret')
 
 # Extract IRF values
-irf_us10y = irf.irfs[:, btc_idx, us10y_idx]
-irf_vix   = irf.irfs[:, btc_idx, vix_idx]
-irf_sp500 = irf.irfs[:, btc_idx, sp500_idx]
+irf_us10y = irf.orth_irfs[:, btc_idx, us10y_idx]
+irf_vix   = irf.orth_irfs[:, btc_idx, vix_idx]
+irf_sp500 = irf.orth_irfs[:, btc_idx, sp500_idx]
 
 # Compute confidence intervals via bootstrap (100 runs)
 irf_ci = var_result.irf(20, var_decomp=None)
@@ -236,6 +242,9 @@ fevd_post_df = pd.DataFrame(
 print(f"Pre-2020 VAR: AIC selected {lag_pre} lag(s)")
 print(f"Post-2020 VAR: AIC selected {lag_post} lag(s)")
 
+print(f"Pre-2020 VAR stable: {var_pre.is_stable()}")
+print(f"Post-2020 VAR stable: {var_post.is_stable()}")
+
 irf_pre  = var_pre.irf(20)
 irf_post = var_post.irf(20)
 
@@ -271,6 +280,8 @@ plt.tight_layout()
 plt.savefig('irf_split_sample.png', dpi=150, bbox_inches='tight')
 plt.show()
 print("Split sample IRF plot saved as 'irf_split_sample.png'")
+
+
 
 # STEP 9: SUMMARY TABLE FOR REPORT
 
