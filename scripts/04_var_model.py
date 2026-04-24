@@ -209,6 +209,32 @@ print("FEVD plot saved as 'fevd_full_sample.png'")
 
 # STEP 8: SPLIT SAMPLE VAR (PRE vs POST 2020)
 
+pre_2020  = transformed[transformed.index < '2020-01-01']
+post_2020 = transformed[transformed.index >= '2020-01-01']
+
+print(f"Pre-2020:  {pre_2020.index[0].date()} to {pre_2020.index[-1].date()} ({len(pre_2020)} obs)")
+print(f"Post-2020: {post_2020.index[0].date()} to {post_2020.index[-1].date()} ({len(post_2020)} obs)")
+
+lag_pre  = max(1, VAR(pre_2020).select_order(maxlags=10).aic)
+var_pre  = VAR(pre_2020).fit(lag_pre)
+
+lag_post  = max(1, VAR(post_2020).select_order(maxlags=10).aic)
+var_post  = VAR(post_2020).fit(lag_post)
+
+fevd_pre = var_pre.fevd(20)
+fevd_pre_df = pd.DataFrame(
+    fevd_pre.decomp[pre_2020.columns.get_loc('BTC_ret')],
+    columns=pre_2020.columns
+)
+
+fevd_post = var_post.fevd(20)
+fevd_post_df = pd.DataFrame(
+    fevd_post.decomp[post_2020.columns.get_loc('BTC_ret')],
+    columns=post_2020.columns
+)
+
+print(f"Pre-2020 VAR: AIC selected {lag_pre} lag(s)")
+print(f"Post-2020 VAR: AIC selected {lag_post} lag(s)")
 
 irf_pre  = var_pre.irf(20)
 irf_post = var_post.irf(20)
