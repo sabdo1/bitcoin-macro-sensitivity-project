@@ -141,7 +141,7 @@ irf_sp500 = irf.orth_irfs[:, btc_idx, sp500_idx]
 
 # Compute confidence intervals via bootstrap (100 runs)
 irf_ci = var_result.irf(20, var_decomp=None)
-lower_band, upper_band = irf.errband_mc(orth=True, repl=100, signif=0.05)
+lower_band, upper_band = irf.errband_mc(orth=True, repl=1000, signif=0.05)
 
 # Extract bands for BTC response
 lower_us10y = lower_band[:, btc_idx, us10y_idx]
@@ -261,8 +261,8 @@ periods = irf_pre.irfs.shape[0]
 for col, (shock, label) in enumerate(zip(shocks, labels)):
     shock_idx = list(pre_2020.columns).index(shock)
 
-    irf_pre_vals  = irf_pre.irfs[:,  btc_idx, shock_idx]
-    irf_post_vals = irf_post.irfs[:, btc_idx, shock_idx]
+    irf_pre_vals  = irf_pre.orth_irfs[:,  btc_idx, shock_idx]
+    irf_post_vals = irf_post.orth_irfs[:, btc_idx, shock_idx]
 
     axes[0, col].plot(range(periods), irf_pre_vals,
                       color='steelblue', linewidth=2)
@@ -293,13 +293,14 @@ print(f"Full sample VAR lag order (AIC): {chosen_lag}")
 print(f"Pre-2020 VAR lag order (AIC):    {lag_pre}")
 print(f"Post-2020 VAR lag order (AIC):   {lag_post}")
 print("\nFEVD at 20-day horizon (Full Sample):")
-print(fevd_df.iloc[19].round(4).to_string())
+print(fevd_df.iloc[-1].round(4).to_string())
 print("\nFEVD at 20-day horizon (Pre-2020):")
-print(fevd_pre_df.iloc[19].round(4).to_string())
+print(fevd_pre_df.iloc[-1].round(4).to_string())
 print("\nFEVD at 20-day horizon (Post-2020):")
-print(fevd_post_df.iloc[19].round(4).to_string())
+print(fevd_post_df.iloc[-1].round(4).to_string())
 print("\nOutputs saved: irf_full_sample.png, fevd_full_sample.png,")
 print("               irf_split_sample.png, fevd_split_sample.png")
+
 
 # Regenerate and save FEVD split sample plot
 fig, axes = plt.subplots(1, 2, figsize=(16, 6))
