@@ -14,11 +14,8 @@ January 2017 – March 2026
 1. Rolling window regressions
 2. Structural break tests (Chow, Bai-Perron)
 3. VAR model with IRFs and FEVD
-4. Granger causality tests
+4. Transfer Entropy tests
 
-## How to Run
-Install dependencies: pip install -r requirements.txt
-Run scripts in order: 01 then 02 then 03 then 04 then 05
 
-## Team
-[Add names and roles here]
+
+
